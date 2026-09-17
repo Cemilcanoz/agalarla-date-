@@ -1,87 +1,15 @@
 import { useState } from "react";
-import { formatActiveSeconds, type SessionScreen, type SessionViewState } from "./session";
-
-const initialState: SessionViewState = {
-  screen: "queue",
-  activeSeconds: 0,
-  canSendFriendRequest: false,
-  canRequestVideo: false
-};
-
-const screenCopy: Record<SessionScreen, { title: string; body: string }> = {
-  queue: {
-    title: "Yeni bir sohbet ara",
-    body: "Tercihlerine uyan biri bulunduğunda güvenli sesli görüşme başlayacak."
-  },
-  connecting: {
-    title: "Bağlantı kuruluyor",
-    body: "Mikrofonun yalnızca görüşme için kullanılır. İzin vermeden sesli sohbet başlamaz."
-  },
-  audio: {
-    title: "Sesli sohbet aktif",
-    body: "Süre sunucuda doğrulanır. İstediğin anda geçebilir, engelleyebilir veya raporlayabilirsin."
-  },
-  reconnecting: {
-    title: "Yeniden bağlanılıyor",
-    body: "Bağlantı kurulana kadar aktif süre ilerlemez."
-  },
-  ended: {
-    title: "Görüşme sona erdi",
-    body: "Hazır olduğunda yeni bir eşleşme arayabilirsin."
-  }
-};
-
+type Step = "age" | "profile" | "preferences" | "queue";
+type Queue = "idle" | "searching" | "matched" | "empty" | "error";
+const adult = (value: string) => { if (!value) return false; const b = new Date(`${value}T00:00:00`); const n = new Date(); return n.getFullYear() - b.getFullYear() - Number(n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) >= 18; };
 export function App() {
-  const [state, setState] = useState(initialState);
-  const copy = screenCopy[state.screen];
-  const isSessionActive = state.screen === "audio" || state.screen === "reconnecting";
-
-  function simulateMatch() {
-    setState({ ...initialState, screen: "connecting" });
-  }
-
-  function startAudio() {
-    setState({ screen: "audio", activeSeconds: 30, canSendFriendRequest: true, canRequestVideo: false });
-  }
-
-  function endSession() {
-    setState({ ...state, screen: "ended" });
-  }
-
-  return (
-    <main className="app-shell">
-      <header className="topbar">
-        <p className="eyebrow">Agalarla Date</p>
-        <span className="status" aria-live="polite">Güvenli görüşme</span>
-      </header>
-
-      <section className="card" aria-labelledby="screen-title">
-        <p className="step">Sprint 0 · İstemci kabuğu</p>
-        <h1 id="screen-title">{copy.title}</h1>
-        <p>{copy.body}</p>
-
-        {isSessionActive && (
-          <div className="timer" aria-live="polite">
-            <span>Sunucu süresi</span>
-            <strong>{formatActiveSeconds(state.activeSeconds)}</strong>
-          </div>
-        )}
-
-        <div className="actions">
-          {state.screen === "queue" && <button onClick={simulateMatch}>Eşleşme ara</button>}
-          {state.screen === "connecting" && <button onClick={startAudio}>Mikrofon izniyle devam et</button>}
-          {state.screen === "audio" && state.canSendFriendRequest && <button>Arkadaşlık isteği gönder</button>}
-          {state.screen === "ended" && <button onClick={simulateMatch}>Yeniden eşleş</button>}
-        </div>
-
-        {isSessionActive && (
-          <div className="safety-actions" aria-label="Güvenlik kontrolleri">
-            <button className="secondary" onClick={endSession}>Geç</button>
-            <button className="secondary" onClick={endSession}>Engelle</button>
-            <button className="secondary" onClick={endSession}>Raporla</button>
-          </div>
-        )}
-      </section>
-    </main>
-  );
+  const [step, setStep] = useState<Step>("age"); const [birth, setBirth] = useState(""); const [rules, setRules] = useState(false); const [name, setName] = useState(""); const [interests, setInterests] = useState(""); const [language, setLanguage] = useState("Türkçe"); const [min, setMin] = useState(18); const [max, setMax] = useState(35); const [km, setKm] = useState(25); const [queue, setQueue] = useState<Queue>("idle");
+  const profile = name.trim().length >= 2 && interests.trim().length >= 2; const preferences = min >= 18 && max >= min && max <= 99 && km >= 1 && km <= 200;
+  const text = queue === "searching" ? "Tercihlerine uygun biri aranıyor." : queue === "matched" ? "Eşleşme bulundu; sesli görüşmeye geçebilirsin." : queue === "empty" ? "Şu an uygun eşleşme yok." : queue === "error" ? "Kuyruğa bağlanılamadı; yeniden dene." : "Hazır olduğunda eşleşme arayabilirsin.";
+  return <main className="app-shell"><header className="topbar"><div><p className="eyebrow">Agalarla Date</p><p>Güvenli sohbet için önce seni tanıyalım.</p></div><span className="status">Sprint 1</span></header><nav className="progress">{["age", "profile", "preferences", "queue"].map(x => <span className={step === x ? "active" : ""} key={x}>{x}</span>)}</nav><section className="card">
+    {step === "age" && <><p className="step">1 / 4 · Uygunluk</p><h1>Güvenli bir başlangıç.</h1><label>Doğum tarihi<input type="date" max={new Date().toISOString().slice(0, 10)} value={birth} onChange={e => setBirth(e.target.value)} /></label>{birth && !adult(birth) && <p className="error">18 yaşında veya üzerinde olmalısın.</p>}<label className="checkbox"><input type="checkbox" checked={rules} onChange={e => setRules(e.target.checked)} />Topluluk kurallarını kabul ediyorum.</label><button disabled={!adult(birth) || !rules} onClick={() => setStep("profile")}>Devam et</button></>}
+    {step === "profile" && <><p className="step">2 / 4 · Profil</p><h1>Sohbete bağlam kat.</h1><label>Takma ad<input value={name} onChange={e => setName(e.target.value)} /></label><label>Dil<select value={language} onChange={e => setLanguage(e.target.value)}><option>Türkçe</option><option>English</option></select></label><label>İlgi alanları<input value={interests} onChange={e => setInterests(e.target.value)} /></label><button disabled={!profile} onClick={() => setStep("preferences")}>Tercihlere devam et</button></>}
+    {step === "preferences" && <><p className="step">3 / 4 · Tercihler</p><h1>Kiminle sohbet etmek istersin?</h1><label>En düşük yaş<input type="number" min="18" value={min} onChange={e => setMin(Number(e.target.value))} /></label><label>En yüksek yaş<input type="number" min="18" value={max} onChange={e => setMax(Number(e.target.value))} /></label><label>Mesafe (km)<input type="number" min="1" value={km} onChange={e => setKm(Number(e.target.value))} /></label>{!preferences && <p className="error">Tercihleri kontrol et.</p>}<button disabled={!preferences} onClick={() => setStep("queue")}>Kuyruğa hazırlan</button></>}
+    {step === "queue" && <><p className="step">4 / 4 · Kuyruk</p><h1>Hazırsın, {name}.</h1><p aria-live="polite">{text}</p><div className="queue-status">{language} · {min}–{max} yaş · {km} km</div><button onClick={() => setQueue(queue === "searching" ? "idle" : "searching")}>{queue === "searching" ? "Kuyruktan çık" : "Eşleşme ara"}</button><div className="actions"><button className="secondary" onClick={() => setQueue("matched")}>Demo eşleşme</button><button className="secondary" onClick={() => setQueue("empty")}>Uygun aday yok</button><button className="secondary" onClick={() => setQueue("error")}>Bağlantı hatası</button></div></>}
+  </section></main>;
 }
