@@ -10,3 +10,15 @@
 - [Rastgele sohbet ve zamanla açılan özellikler](TIMED_UNLOCK_FLOW.md)
 - [İstemci UX sözleşmesi](CLIENT_UX_SPEC.md)
 - [Mimari ve realtime sözleşmesi](docs/ARCHITECTURE.md)
+
+## Yerel doğrulama
+
+```bash
+npm ci
+npm run lint
+npm run type-check
+npm test
+npx playwright install chromium
+npm run test:e2e
+npm run build
+```

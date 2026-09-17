@@ -1,105 +1,58 @@
-/**
- * Sprint 1 — Güvenlik ve Eşleşme Kuyruğu Test Paketi
- * Yazar: Kişi 3 (WebRTC / Güvenlik / QA)
- * 
- * Bu test dosyası Sprint 1 teslim kriterlerini doğrulamak için hazırlanmıştır:
- * 1. 18 yaş altı kullanıcıların sisteme kaydolmasını ve kuyruğa girmesini engelleme (Age Gate).
- * 2. Topluluk kuralları onaylanmadan devam edilememesi.
- * 3. Engellenmiş (blocked) kullanıcıların eşleşme kuyruğunda aday havuzundan çıkarılması.
- * 4. Kayıt -> Profil -> Kuyruk akışı için Smoke Test senaryosu.
- */
+import { describe, expect, it } from "vitest";
+import { evaluateQueueEligibility, isAdult } from "../../src/domain/eligibility";
+import { createMatchSession, findEligibleMatch, type QueueCandidate } from "../../src/domain/matching";
 
-describe('Sprint 1 - Güvenlik ve Yaş Kontrolü (Age Gate) Testleri', () => {
+const now = new Date("2026-09-17T12:00:00.000Z");
 
-  test('18 yaşından küçük kullanıcı (ör. 17 yaşında) kaydolmaya çalıştığında reddedilmeli', async () => {
-    const today = new Date();
-    const underageBirthDate = new Date(today.getFullYear() - 17, today.getMonth(), today.getDate()).toISOString();
-
-    const mockRegisterPayload = {
-      email: 'test_underage@example.com',
-      birthDate: underageBirthDate,
-      agreedTerms: true,
-    };
-
-    // Simüle edilen doğrulama mantığı
-    const calculateAge = (birthDateStr: string): number => {
-      const birthDate = new Date(birthDateStr);
-      const ageDiff = today.getFullYear() - birthDate.getFullYear();
-      return ageDiff;
-    };
-
-    const isEligible = calculateAge(mockRegisterPayload.birthDate) >= 18;
-
-    expect(isEligible).toBe(false);
+describe("Sprint 1 eligibility rules", () => {
+  it("rejects someone whose 18th birthday has not arrived", () => {
+    expect(isAdult("2008-09-18", now)).toBe(false);
+    expect(evaluateQueueEligibility({ birthDate: "2008-09-18", agreedToRules: true, profileComplete: true }, now))
+      .toEqual({ eligible: false, reason: "UNDERAGE" });
   });
 
-  test('18 yaş ve üzeri kullanıcı kaydı başarıyla tamamlanmalı', async () => {
-    const today = new Date();
-    const adultBirthDate = new Date(today.getFullYear() - 22, today.getMonth(), today.getDate()).toISOString();
-
-    const mockRegisterPayload = {
-      email: 'test_adult@example.com',
-      birthDate: adultBirthDate,
-      agreedTerms: true,
-    };
-
-    const calculateAge = (birthDateStr: string): number => {
-      const birthDate = new Date(birthDateStr);
-      return today.getFullYear() - birthDate.getFullYear();
-    };
-
-    const isEligible = calculateAge(mockRegisterPayload.birthDate) >= 18;
-
-    expect(isEligible).toBe(true);
+  it("accepts someone on their 18th birthday", () => {
+    expect(isAdult("2008-09-17", now)).toBe(true);
   });
 
-  test('Topluluk kurallarını onaylamayan kullanıcı kayıt olamamalı', async () => {
-    const mockUser = {
-      email: 'no_rules@example.com',
-      birthDate: '2000-01-01',
-      agreedTerms: false, // Kurallar onaylanmadı
-    };
-
-    const canProceed = mockUser.agreedTerms === true;
-    expect(canProceed).toBe(false);
+  it("requires rules consent and a complete profile", () => {
+    expect(evaluateQueueEligibility({ birthDate: "2000-01-01", agreedToRules: false, profileComplete: true }, now))
+      .toEqual({ eligible: false, reason: "RULES_REQUIRED" });
+    expect(evaluateQueueEligibility({ birthDate: "2000-01-01", agreedToRules: true, profileComplete: false }, now))
+      .toEqual({ eligible: false, reason: "PROFILE_INCOMPLETE" });
   });
 });
 
-describe('Sprint 1 - Engellenen Kullanıcı (Blocklist) Filtreleme Testleri', () => {
+describe("Sprint 1 matching rules", () => {
+  const requester: QueueCandidate = {
+    id: "user_A", age: 24, language: "tr", minPreferredAge: 20, maxPreferredAge: 30,
+    maxDistanceKm: 25, distanceKm: 0, inQueue: true,
+  };
+  const candidate: QueueCandidate = {
+    id: "user_B", age: 26, language: "tr", minPreferredAge: 20, maxPreferredAge: 30,
+    maxDistanceKm: 30, distanceKm: 10, inQueue: true,
+  };
 
-  test('Engellenen kullanıcı ID\'si aday eşleşme kuyruğundan çıkarılmalı (EXCLUDE_BLOCKED)', async () => {
-    const userId = 'user_101';
-    const blockedUserId = 'user_999'; // user_101, user_999'u engelledi
-    const eligibleUserId = 'user_202';
+  it("excludes blocks in both directions", () => {
+    const blockedByRequester = new Map([[requester.id, new Set([candidate.id])]]);
+    expect(findEligibleMatch(requester, [candidate], { blockedUsersByUser: blockedByRequester })).toBeNull();
 
-    const blocklistsByUser = new Map([[userId, new Set(['user_999'])]]);
-    const candidatePool = ['user_999', 'user_202'];
-
-    // Filtreleme fonksiyonu (Kişi 2 backend sözleşmesi)
-    const filteredCandidates = candidatePool.filter(candidateId => !blocklistsByUser.get(userId)?.has(candidateId));
-
-    expect(filteredCandidates).not.toContain(blockedUserId);
-    expect(filteredCandidates).toContain(eligibleUserId);
-    expect(filteredCandidates.length).toBe(1);
+    const blockedByCandidate = new Map([[candidate.id, new Set([requester.id])]]);
+    expect(findEligibleMatch(requester, [candidate], { blockedUsersByUser: blockedByCandidate })).toBeNull();
   });
-});
 
-describe('Sprint 1 - Kayıt -> Profil -> Kuyruk Smoke Testi', () => {
+  it("creates one shared session for a compatible pair", () => {
+    const match = findEligibleMatch(requester, [candidate], { blockedUsersByUser: new Map() });
+    expect(match?.id).toBe(candidate.id);
 
-  test('İki geçerli yetişkin kullanıcı tercihleri eşleştiğinde aynı session ID\'yi alabilmeli', async () => {
-    const userA = { id: 'user_A', age: 24, genderPref: 'ANY', inQueue: true };
-    const userB = { id: 'user_B', age: 26, genderPref: 'ANY', inQueue: true };
+    const session = createMatchSession(requester.id, candidate.id, () => "session_A_B");
+    expect(session).toEqual({ sessionId: "session_A_B", participantIds: ["user_A", "user_B"] });
+  });
 
-    const generateMatchSession = (u1: typeof userA, u2: typeof userB) => {
-      if (u1.inQueue && u2.inQueue) {
-        return `session_mock_${u1.id}_${u2.id}`;
-      }
-      return null;
-    };
-
-    const sessionId = generateMatchSession(userA, userB);
-
-    expect(sessionId).toBeDefined();
-    expect(sessionId).toContain('session_mock_user_A_user_B');
+  it("excludes recently matched peers", () => {
+    const recent = new Map([[requester.id, new Set([candidate.id])]]);
+    expect(findEligibleMatch(requester, [candidate], {
+      blockedUsersByUser: new Map(), recentPeersByUser: recent,
+    })).toBeNull();
   });
 });

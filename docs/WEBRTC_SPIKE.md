@@ -99,3 +99,32 @@ Rastgele eşleşen 1-on-1 kullanıcı görüşmeleri için 3 farklı mimari değ
 - [x] Kayıt Politikası: **Sıfır Kayıt (No Recording)**
 - [x] İzin Yönetimi: **Kademeli İzin (Progressive Permission)**
 - [next] `docs/THREAT_MODEL.md` ile güvenlik kurallarını tanımlama.
+
+---
+
+## 8. Uygulanan İstemci Sözleşmesi
+
+İstemci ses bağlantısı `src/media/livekitAudio.ts` üzerinden başlatılır.
+
+- Token endpoint'i: `POST /v1/sessions/:sessionId/media-token`
+- Kimlik doğrulama: güvenli HTTP-only oturum çerezi (`credentials: include`)
+- Tekrar deneme güvenliği: her istek için `Idempotency-Key`
+- Beklenen yanıt: `{ url, token, roomName, expiresAt }`
+- Token yalnızca bellekte tutulur; loglanmaz veya kalıcı depolamaya yazılmaz.
+- Mikrofon izni token isteğinden hemen önce ve yalnızca görüşme başlatılırken alınır.
+- İzin reddedilirse token istenmez ve `MICROPHONE_DENIED` sonucu üretilir.
+- LiveKit reconnect olayları istemciye `reconnecting`, `connected` ve `disconnected` olarak aktarılır.
+
+Backend, isteği yapan kullanıcının ilgili session'ın aktif katılımcısı olduğunu doğrulamalı, token'ı
+yalnızca o session'a ait room için üretmeli ve kısa süreli tutmalıdır. Bu kontrol istemciden gelen
+`roomName` veya kullanıcı kimliğine güvenmemelidir.
+
+### Manuel iki tarayıcı smoke testi
+
+1. Backend'in iki test kullanıcısını aynı `sessionId` ile eşleştirdiğini doğrula.
+2. İki ayrı tarayıcı profilinde sesli görüşmeyi başlat.
+3. Yalnızca mikrofon izninin istendiğini ve iki tarafın birbirini duyduğunu doğrula.
+4. Bir sekmeyi çevrimdışı yap; arayüzün `reconnecting` durumuna geçtiğini doğrula.
+5. 15 saniye içinde bağlantıyı geri getir ve sesin devam ettiğini doğrula.
+6. 15 saniyeyi aşan kesintide backend'in session'ı `connection_lost` ile bitirdiğini doğrula.
+7. Konsol ve ağ loglarında token, ses içeriği veya kişisel veri bulunmadığını kontrol et.
