@@ -1,7 +1,7 @@
 # Güvenlik ve Tehdit Modeli (THREAT_MODEL.md)
 
-**Yazar:** Kişi 3 (WebRTC / Güvenlik / QA)  
-**Proje:** Agalarla Date  
+**Yazar:** Kişi 3 (WebRTC / Güvenlik / QA)
+**Proje:** Agalarla Date
 **Tarih:** 2026-09-17  
 **Durum:** Onaylandı / Sprint 0 Çıktısı  
 

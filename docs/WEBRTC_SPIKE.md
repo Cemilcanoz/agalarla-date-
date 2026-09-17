@@ -1,7 +1,7 @@
 # WebRTC Teknik Araştırması ve Medya Mimarisi (WEBRTC_SPIKE.md)
 
-**Yazar:** Kişi 3 (WebRTC / Güvenlik / QA)  
-**Proje:** Agalarla Date  
+**Yazar:** Kişi 3 (WebRTC / Güvenlik / QA)
+**Proje:** Agalarla Date
 **Tarih:** 2026-09-17  
 **Durum:** Onaylandı / Sprint 0 Çıktısı  
 
