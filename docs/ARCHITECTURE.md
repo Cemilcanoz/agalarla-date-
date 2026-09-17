@@ -25,7 +25,7 @@ Fastify API / realtime gateway ────────────► LiveKit s
 | Layer | Sprint 0 choice | Rationale |
 | --- | --- | --- |
 | Client | React + TypeScript + Vite | Fast mobile-first web shell; no framework-specific server dependency |
-| API | Node.js 20 + TypeScript + Fastify | Shared types with client and low-overhead REST/WebSocket support |
+| API | Node.js 22 + TypeScript + Fastify | Shared types with client and low-overhead REST/WebSocket support |
 | Durable data | PostgreSQL | Transactional friendship, blocks, consent, and audit metadata |
 | Ephemeral data | Redis | Queue presence, heartbeat state, rate-limit counters |
 | Media | LiveKit Cloud for pilot; self-hosted compatible | Selected in `docs/WEBRTC_SPIKE.md`; avoids storing media in application services |
