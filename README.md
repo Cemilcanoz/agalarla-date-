@@ -8,3 +8,4 @@
 - [Geliştirme planı](ROADMAP.md)
 - [Üç kişilik sprint ve agentic engineering planı](TEAM_SPRINT_PLAN.md)
 - [Rastgele sohbet ve zamanla açılan özellikler](TIMED_UNLOCK_FLOW.md)
+- [İstemci UX sözleşmesi](CLIENT_UX_SPEC.md)
