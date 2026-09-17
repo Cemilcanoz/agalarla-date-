@@ -26,30 +26,41 @@ Bu nedenle ilk sürümün ana vaadi şu olmalı:
 
 ## Ürün kararları
 
+### Güncellenmiş ürün yönü
+
+Agalarla Date'in ayırt edici deneyimi klasik kart kaydırma yerine rastgele sesli eşleşme ve zamana bağlı güven katmanları olacak:
+
+- İlk anda rastgele sesli sohbet.
+- 30 saniye aktif görüşmeden sonra arkadaşlık isteği.
+- 120 saniye aktif görüşmeden sonra karşılıklı onaylı görüntülü görüşme.
+- Karşılıklı arkadaşlık sonrasında kalıcı mesajlaşma.
+
+Bu eşikler başlangıç hipotezidir; pilot verisine göre değiştirilmelidir.
+
 ### MVP'ye dahil
 
 1. E-posta/telefon ile hesap oluşturma.
 2. 18+ yaş kapısı, konum/mesafe ve yaş tercihleri.
 3. 3–6 fotoğraf, üç profil prompt'u, ilgi alanları ve ilişki niyeti.
-4. Keşfet: beğen, geç, geri al değil; ilk sürümde sade ve anlaşılır akış.
-5. Karşılıklı beğenide eşleşme.
-6. Beğeniye yorum ekleme ve eşleşme sonrası açılış sorusu.
-7. Mesajlaşma, bildirim, eşleşmeyi kaldırma.
-8. Profil doğrulama etiketi için manuel/geleceğe hazır veri modeli.
-9. Engelle, raporla, moderasyon kuyruğu ve güvenlik metinleri.
-10. Buluşma planı: yer/zaman önerisi ve seçilen güvendiği kişiye paylaşım.
+4. Tercihlere göre rastgele eşleşme kuyruğu.
+5. Sesli görüşme ve sunucu kontrollü aktif süre sayacı.
+6. 30 saniyede arkadaşlık isteği; karşılıklı istekte arkadaşlık.
+7. 120 saniyede iki tarafın onayıyla görüntülü görüşme.
+8. Karşılıklı arkadaşlık sonrası mesajlaşma ve bildirim.
+9. Profil doğrulama etiketi için manuel/geleceğe hazır veri modeli.
+10. Engelle, raporla, moderasyon kuyruğu ve güvenlik metinleri.
 
 ### MVP dışında bırakılmalı
 
-Ödeme/abonelik, karmaşık yapay zekâ eşleştirme, canlı video, sosyal feed, grup date, arka plan kontrolü ve çok sayıda premium filtre. Bunlar kullanıcı değeri kanıtlandıktan sonra ele alınmalı.
+Ödeme/abonelik, karmaşık yapay zekâ eşleştirme, sosyal feed, grup date, arka plan kontrolü ve çok sayıda premium filtre. Bunlar kullanıcı değeri kanıtlandıktan sonra ele alınmalı.
 
 ## Başarı ölçütleri
 
 - Profil tamamlama oranı
-- İlk 24 saatte en az bir beğeni gönderme oranı
-- Eşleşme başına ilk mesaj oranı
-- İlk mesaja yanıt oranı
-- Eşleşmeden buluşma planına geçiş oranı
+- Rastgele oturum başlatma ve bağlanma oranı
+- 30 ve 120 saniye eşiklerine ulaşma oranı
+- Arkadaşlık isteği ve karşılıklı arkadaşlık oranı
+- Video isteği ve kabul oranı
 - Rapor/engelleme oranı ve rapor çözüm süresi
 - 7 günlük geri dönüş oranı
 

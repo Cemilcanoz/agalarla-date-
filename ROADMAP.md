@@ -2,86 +2,92 @@
 
 ## Ürün kapsamı
 
-Üç kişilik ekip için önerilen ilk sürüm: güvenli, kişilik odaklı eşleşme ve sohbet MVP'si. İlk sürüm tek bir platformda ve tek bir şehir/ülke pilotunda doğrulanmalı.
+Üç kişilik ekip için ilk sürüm: rastgele sesli eşleşme, konuşma süresine göre özellik açılması, karşılıklı arkadaşlık ve güvenli görüntülü görüşme.
+
+Ayrıntılı akış: [Rastgele sohbet ve zamanla açılan özellikler](TIMED_UNLOCK_FLOW.md)
 
 ## Ekip paylaşımı
 
-- **Kişi 1 — Ürün/Frontend:** onboarding, profil düzenleme, keşfet ve tasarım sistemi.
-- **Kişi 2 — Backend:** auth, profil, tercih, beğeni/eşleşme, mesaj API'leri ve veritabanı.
-- **Kişi 3 — Güvenlik/Platform/QA:** medya yükleme, moderasyon, bildirim, analitik, test ve deployment.
-
-Her özellik için bir sorumlu, bir reviewer ve kabul kriterleri issue içinde yazılmalı.
+- **Kişi 1 — Ürün/Frontend:** onboarding, eşleşme kuyruğu, görüşme ekranı, sayaç ve izin/onay arayüzleri.
+- **Kişi 2 — Backend/Realtime:** kullanıcı, eşleştirme kuyruğu, oturum sayacı, arkadaşlık ve WebSocket servisleri.
+- **Kişi 3 — WebRTC/Güvenlik/QA:** ses-video altyapısı, moderasyon, engelle/raporla, analitik, test ve deployment.
 
 ## Aşamalar
 
-### Aşama 0 — 2–3 gün: Karar ve temel kurulum
+### Aşama 0 — 2–3 gün: Ürün ve mimari kararları
 
-- Hedef kullanıcı ve pilot bölgeyi netleştir.
-- Figma wireframe: onboarding, keşfet, profil, eşleşme, sohbet, raporla.
-- Teknoloji kararını yazılı hale getir.
-- `main` koruması, issue şablonu, PR şablonu, environment değişkenleri ve CI kurulumu.
-- KVKK/GDPR veri haritası: yaş, konum, fotoğraf, mesaj ve rapor kayıtları.
+- Hedef kullanıcı, pilot bölge ve eşleştirme filtrelerini kesinleştir.
+- Görüşme ekranı, 30 saniye ve 120 saniye açılma durumlarının wireframe'ini hazırla.
+- Mobil/web platformu, backend, veritabanı ve WebRTC sağlayıcısını seç.
+- `main` koruması, PR şablonu, CI ve ortam değişkenlerini kur.
+- KVKK/GDPR veri haritası ve içerik saklama politikasını yaz.
 
-### Aşama 1 — 1. hafta: Hesap ve profil
+### Aşama 1 — 1. hafta: Hesap, profil ve kuyruk
 
-- Auth ve 18+ kontrolü.
-- Profil CRUD, fotoğraf sıralama, prompt ve ilgi alanları.
-- Yaş/mesafe/niyet tercihleri.
-- Fotoğraf boyut/adet/doğrulama kontrolleri.
+- Auth, 18+ kontrolü ve topluluk kuralları onayı.
+- Kısa profil: takma ad, fotoğraf, yaş, dil ve ilgi alanları.
+- Tercih filtreleri ve rastgele eşleştirme kuyruğu.
+- Engellenen veya yakın zamanda görüşülen kullanıcıları hariç tutma.
 
-### Aşama 2 — 2. hafta: Keşfet ve eşleşme
+### Aşama 2 — 2. hafta: Sesli oturum ve güvenilir sayaç
 
-- Tercihlere göre aday listeleme.
-- Beğen/geç işlemleri ve tekrar işlem idempotency'si.
-- Karşılıklı beğeniyle match oluşturma.
-- Belirli fotoğraf/prompt'a yorum ekleme.
-- Temel analitik event'leri.
+- WebRTC sesli görüşme ve bağlantı durumları.
+- Sunucu kontrollü aktif oturum sayacı ve heartbeat.
+- Bağlantı kopması/yeniden bağlanma davranışı.
+- Geç, oturumu bitir, engelle ve raporla akışları.
 
-### Aşama 3 — 3. hafta: Sohbet ve güvenlik
+### Aşama 3 — 3. hafta: 30 saniye arkadaşlık kilidi
 
-- Match odaklı mesajlaşma.
-- Açılış sorusu önerileri; otomatik mesaj gönderilmez.
-- Engelle, raporla, match kaldır.
-- Moderasyon kuyruğu ve admin görünümü.
-- Hesap silme, veri silme/indirme ve gizlilik metinleri.
+- 30 saniye sonunda arkadaşlık isteği özelliğini aç.
+- Tek yönlü istek ve karşılıklı arkadaşlık durumları.
+- Karşılıklı arkadaşlık sonrası kalıcı mesajlaşma.
+- Sayaç ve arkadaşlık API'leri için entegrasyon testleri.
 
-### Aşama 4 — 4. hafta: Pilot ve kalite
+### Aşama 4 — 4. hafta: 120 saniye video kilidi
 
-- Push/e-posta bildirimleri.
-- Buluşma planı: yer/zaman notu ve güvendiği kişiye paylaşım.
-- Crash/error logging, rate limit, spam koruması.
-- E2E test, erişilebilirlik ve mobil responsive kontrol.
-- 10–20 kişilik kapalı pilot; haftalık geri bildirim görüşmeleri.
+- 120 saniye sonunda video isteği özelliğini aç.
+- İki taraflı açık onay ve kamera/mikrofon izinleri.
+- Ses-video geçişi ve reddetme durumunda sese devam.
+- Cihaz, bağlantı kalitesi ve izin hata ekranları.
+
+### Aşama 5 — 5. hafta: Moderasyon ve kapalı pilot
+
+- Moderasyon kuyruğu, rate limit ve risk sinyalleri.
+- Temel analitik dashboard'u ve uzaktan eşik ayarı.
+- E2E, erişilebilirlik, mobil responsive ve yük testleri.
+- 20–50 kişilik kapalı pilot; 30/120 saniye eşiklerini veriye göre değerlendir.
 
 ## İlk GitHub issue listesi
 
-- `#1` Product brief and acceptance criteria
-- `#2` Choose stack and document architecture
-- `#3` Initialize app shell and CI
-- `#4` Implement auth and 18+ gate
-- `#5` Implement profile and media upload
-- `#6` Implement preferences and discovery feed
-- `#7` Implement likes, comments and matches
-- `#8` Implement match chat
-- `#9` Implement block/report/moderation flow
-- `#10` Add analytics events and privacy controls
-- `#11` Add notifications and date plan
-- `#12` Run closed pilot and prioritize feedback
+- `#1` Define random session product rules and acceptance criteria
+- `#2` Choose app stack and WebRTC provider
+- `#3` Initialize app shell, CI and environments
+- `#4` Implement auth, 18+ gate and short profiles
+- `#5` Implement preference-based random matching queue
+- `#6` Implement realtime session state and server timer
+- `#7` Implement audio call and reconnect flow
+- `#8` Unlock friend request at configurable threshold
+- `#9` Implement mutual friendship and persistent chat
+- `#10` Unlock bilateral video request at configurable threshold
+- `#11` Implement skip, block, report and moderation queue
+- `#12` Add analytics, remote configuration and pilot dashboard
+- `#13` Run closed pilot and tune unlock thresholds
 
 ## Yayına çıkış kabul kriterleri
 
-- Kullanıcı profilini tamamlayıp tercihlerini kaydedebiliyor.
-- İki kullanıcı karşılıklı beğenince tek bir match oluşuyor.
-- Yalnızca match olmuş kullanıcılar mesajlaşabiliyor.
-- Kullanıcı her profili engelleyip raporlayabiliyor.
-- Raporlar güvenli biçimde admin kuyruğuna düşüyor.
-- Hesap silme, medya silme ve temel kişisel veri silme akışı çalışıyor.
+- Uygun iki kullanıcı rastgele eşleşip sesli görüşmeye başlayabiliyor.
+- Aktif süre sunucuda sayılıyor ve bağlantı yokken ilerlemiyor.
+- Arkadaşlık isteği varsayılan olarak 30 saniyede açılıyor.
+- Video isteği varsayılan olarak 120 saniyede açılıyor ve iki tarafın onayını gerektiriyor.
+- Kullanıcı ilk saniyeden itibaren geçebiliyor, engelleyebiliyor ve raporlayabiliyor.
+- Engellenen kullanıcılar tekrar eşleşmiyor.
+- Yalnızca karşılıklı arkadaş olan kullanıcılar kalıcı mesajlaşabiliyor.
 - Kritik akışlar otomatik testlerle korunuyor.
 
 ## Takım çalışma kuralları
 
 - Feature branch → PR → code review → CI → merge.
-- Bir PR tek bir iş akışına odaklanmalı.
-- Secret, gerçek kullanıcı fotoğrafı veya mesajı repoya konulmamalı.
-- Her hafta: 30 dakika demo, 30 dakika metrik/geri bildirim değerlendirmesi.
-- Yeni özellik ancak bir kullanıcı problemi ve ölçülebilir başarı metriğiyle açılmalı.
+- Her özellik için bir sorumlu, bir reviewer ve ölçülebilir kabul kriterleri bulunmalı.
+- Secret, gerçek kullanıcı fotoğrafı, ses veya mesaj repoya konulmamalı.
+- Her hafta demo ve metrik/geri bildirim değerlendirmesi yapılmalı.
+- Sayaç eşikleri kod değişikliği olmadan yapılandırılabilmeli.
