@@ -1,0 +1,97 @@
+name: Agalarla Date CI Pipeline
+
+on:
+  push:
+    branches: [ main, 'sprint-*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-typecheck:
+    name: Code Quality (Lint & Type-Check)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+        continue-on-error: true
+
+      - name: Install Dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm ci || npm install
+          else
+            echo "package.json not found yet, skipping npm ci"
+          fi
+
+      - name: Run Linter
+        run: |
+          if npm run | grep -q "lint"; then
+            npm run lint
+          else
+            echo "Lint script not defined yet."
+          fi
+
+      - name: Run Type Check
+        run: |
+          if npm run | grep -q "type-check"; then
+            npm run type-check
+          else
+            echo "Type-check script not defined yet."
+          fi
+
+  unit-and-integration-tests:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+        continue-on-error: true
+
+      - name: Install Dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm ci || npm install
+          fi
+
+      - name: Run Unit & Integration Tests
+        run: |
+          if npm run | grep -q "test"; then
+            npm run test
+          else
+            echo "Test script not defined yet."
+          fi
+
+  e2e-smoke-tests:
+    name: E2E Smoke Tests
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, unit-and-integration-tests]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run E2E Tests
+        run: |
+          if npm run | grep -q "test:e2e"; then
+            npm run test:e2e
+          else
+            echo "E2E test script not defined yet."
+          fi
