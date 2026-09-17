@@ -72,11 +72,11 @@ describe('Sprint 1 - Engellenen Kullanıcı (Blocklist) Filtreleme Testleri', ()
     const blockedUserId = 'user_999'; // user_101, user_999'u engelledi
     const eligibleUserId = 'user_202';
 
-    const mockUserBlocklist = new Set(['user_999']);
+    const blocklistsByUser = new Map([[userId, new Set(['user_999'])]]);
     const candidatePool = ['user_999', 'user_202'];
 
     // Filtreleme fonksiyonu (Kişi 2 backend sözleşmesi)
-    const filteredCandidates = candidatePool.filter(candidateId => !mockUserBlocklist.has(candidateId));
+    const filteredCandidates = candidatePool.filter(candidateId => !blocklistsByUser.get(userId)?.has(candidateId));
 
     expect(filteredCandidates).not.toContain(blockedUserId);
     expect(filteredCandidates).toContain(eligibleUserId);
