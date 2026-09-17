@@ -6,6 +6,8 @@
 
 Ayrıntılı akış: [Rastgele sohbet ve zamanla açılan özellikler](TIMED_UNLOCK_FLOW.md)
 
+Görev sahipliği, sprint teslimleri ve agentic çalışma yöntemi: [Üç kişilik agentic engineering sprint planı](TEAM_SPRINT_PLAN.md)
+
 ## Ekip paylaşımı
 
 - **Kişi 1 — Ürün/Frontend:** onboarding, eşleşme kuyruğu, görüşme ekranı, sayaç ve izin/onay arayüzleri.

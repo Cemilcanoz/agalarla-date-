@@ -6,4 +6,5 @@
 
 - [Ürün araştırması](PRODUCT_RESEARCH.md)
 - [Geliştirme planı](ROADMAP.md)
+- [Üç kişilik sprint ve agentic engineering planı](TEAM_SPRINT_PLAN.md)
 - [Rastgele sohbet ve zamanla açılan özellikler](TIMED_UNLOCK_FLOW.md)
